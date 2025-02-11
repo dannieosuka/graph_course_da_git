@@ -1,0 +1,135 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"My first quarto Doc\"\n",
+        "author: \"Daniel Osuka\"\n",
+        "format: \n",
+        "  html:\n",
+        "    embed-resources: true\n",
+        "execute:\n",
+        "    echo: false\n",
+        "---\n",
+        "\n",
+        "# Level 1 Header\n",
+        "\n",
+        "Markdown lets you use *italics* and **embolden texts**\n",
+        "\n",
+        "You can also use bulleted lists: \n",
+        "\n",
+        "- First element\n",
+        "- Second element\n",
+        "\n",
+        "You can also add links [links](https://thegraphcourses.org)\n",
+        "\n",
+        "You can also embed images\n",
+        "![description of the image](images/tgc_unity.webp)\n",
+        "\n",
+        "\n",
+        "## level 2 header\n",
+        "\n",
+        "### Level 3 header\n"
+      ],
+      "id": "88569ee6"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "#|echo: false\n",
+        "#|eval: false\n",
+        "2+2"
+      ],
+      "id": "9e23c4be",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "3*4\n",
+        "\n",
+        "for number in [1,2,3]:\n",
+        "    print(number)\n",
+        "4*4"
+      ],
+      "id": "8c644795",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "# Displaying Tables\n"
+      ],
+      "id": "d23292ff"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "import plotly.express as px\n",
+        "from itables import show\n",
+        "\n",
+        "tips = px.data.tips()\n",
+        "show(tips)"
+      ],
+      "id": "ffdff3b1",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "# Displaying plots\n"
+      ],
+      "id": "4c2a953d"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "px.violin(tips, x= \"tip\", y = 'sex')"
+      ],
+      "id": "f84a89ac",
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "# Displaying Static Plots\n"
+      ],
+      "id": "68b3a706"
+    },
+    {
+      "cell_type": "code",
+      "metadata": {},
+      "source": [
+        "tips_sex= px.violin(tips, x = 'tip', y ='sex')\n",
+        "tips_sex.write_image('outputs/tips by sex.png')\n",
+        "# Does not work"
+      ],
+      "id": "ced50a2a",
+      "execution_count": null,
+      "outputs": []
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "name": "python3",
+      "language": "python",
+      "display_name": "Python 3 (ipykernel)",
+      "path": "d:\\APHRC\\Graph Courses_python\\.venv\\share\\jupyter\\kernels\\python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}

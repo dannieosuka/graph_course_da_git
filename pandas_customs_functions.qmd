@@ -1,0 +1,69 @@
+# imports
+
+
+```{python}
+import pandas as pd
+import numpy as np
+import vega_datasets as vd
+```
+
+# Basics of a function
+
+```{python}
+def pounds_to_kg (pounds):
+    return pounds * 0.4536
+
+```
+
+```{python}
+pounds_to_kg(150)
+```
+# Using inside a dataframe
+
+```{python}
+pounds_df = pd.DataFrame({"pounds": [150,200, 250]})
+pounds_df
+```
+
+```{python}
+pounds_df['kg'] = pounds_to_kg (pounds_df['pounds'])
+pounds_df
+```
+# Practice: Age in months
+```{python}
+def years_to_months (age):
+    return age * 12
+
+riots_df = vd.data.la_riots()
+riots_df
+
+# create a new column of age in months
+riots_df['age_months'] = years_to_months(riots_df['age'])
+riots_df
+```
+# Functions with multiple arguments
+
+```{python}
+def calc_calories(carb_grams=0, fat_grams=0, protein_grams = 0):
+    result = (carb_grams * 4) + (protein_grams * 4) + (fat_grams * 9)
+    return result
+```
+
+```{python}
+calc_calories(carb_grams=50, protein_grams=25, fat_grams=15)
+```
+
+```{python}
+food_df = pd.DataFrame({
+    'food': ["Apple", "Avocado"],
+    'carb': [25,10],
+    'protein': [0,1],
+    'fat': [0,14]
+})
+food_df
+```
+
+```{python}
+food_df ['calories']=  calc_calories(food_df['carb'], food_df['protein'],food_df['fat'] )
+food_df
+```

@@ -1,0 +1,299 @@
+---
+title: "Workshop 7: Using LLMs to Extract Information from Job Descriptions"
+---
+
+# Introduction
+
+For this week's workshop, you will analyze job posting data using Large Language Models (LLMs). You'll extract structured information from job descriptions and create visualizations to understand patterns in the data science job market.
+
+# Setup
+
+First, make sure this document is in your `graph_courses_python` folder, where your virtual environment is activated and you have the required packages installed.
+
+Run the following code to load the necessary packages:
+
+```{python}
+from openai import OpenAI
+import pandas as pd
+import numpy as np
+import plotly.express as px
+from local_settings import OPENAI_KEY # Assumes you have a local_settings.py file in your folder with your OpenAI key  
+# Initialize the OpenAI client
+client = OpenAI(api_key=OPENAI_KEY)
+```
+
+# Define an `llm_chat` Function
+
+Before we start our analysis, let's create a helper function to simplify interactions with the LLM.
+
+Test the function below by asking the question "What is Python (the language) named after?"
+
+```{python}
+def llm_chat(message):
+    response = client.chat.completions.create(
+        model="gpt-4o-mini", messages=[{"role": "user", "content": message}]
+    )
+    return response.choices[0].message.content
+
+```
+
+```{python}
+# Testing the function
+llm_chat("What is Python (the language) named after?")
+```
+
+# Get the Data
+
+The dataset to be used contains job postings scraped from the website Glassdoor. You can see the scraping project [here](https://github.com/picklesueat/data_jobs_data).
+
+Download it from the course website and place it in an appropriate location in your folder.
+
+Load the data into a pandas DataFrame:
+
+```{python}
+# Load the data into a pandas DataFrame
+glassdoor = pd.read_csv ('data/glassdoor_jobs_sample.csv')
+
+glassdoor_v1 = glassdoor.head(10) # first 10 rows of the dataset
+glassdoor_v1
+```
+
+# Task 1: Extract Years of Experience Required
+
+## Part A: Create and Test LLM Function
+
+We will use the LLM to extract the minimum years of experience required from job descriptions.
+
+We have written the prompt for you. Vectorize the function, then test it on the first few rows of the dataset.
+
+```{python}
+def yrs_exp(description):
+    prompt = f"""
+    Extract the minimum years of experience required from this job description. 
+    Return ONLY a number. If a range is given, return the lower number.
+    If no years of experience are explicitly mentioned, return 'NA'.
+    Here's the job description:
+    {description}
+    """
+    return llm_chat(prompt)
+
+# Vectorize the function and test it on the first few rows
+yrs_exp_vec = np.vectorize(yrs_exp) # vectorize the function
+
+glassdoor_v1['min_years_exp'] = yrs_exp_vec(glassdoor_v1['job_description'])
+
+# view data
+glassdoor_v1# Export to csv
+glassdoor_v1.to_csv('outputs/glassdoor2.csv')
+
+```
+
+Write the data to a CSV file and check if the results make sense by comparing them to the original job descriptions.
+
+## Part B: Process Full Dataset
+
+Now that we've confirmed the function works well, let's apply it to the full dataset. Note that this may take about 2 to 3 minutes to run. (For heavier workflows, we recommend you look into 'parallel processing'.)
+
+```{python}
+# Apply the vectorized function to the full dataset
+#glassdoor['min_years_sum'] = glassdoor.to_dict(orient = "records") # combines information across rows
+
+glassdoor['min_years_summary'] = yrs_exp_vec(glassdoor['job_description'])
+
+glassdoor
+
+```
+
+## Part C: Convert to Numeric
+
+The `years_required` column is currently a string. Convert it to a numeric type using the `pd.to_numeric` function, with the `errors='coerce'` argument so that any non-numeric values are converted to `NaN`.
+
+```{python}
+# Convert 'years_required' to numeric
+glassdoor['min_years_summary'] = pd.to_numeric(glassdoor['min_years_summary'], errors='coerce')
+
+# view dataset
+#print(type('min_years_summary'))
+glassdoor
+```
+
+## Part D: Create Visualization
+
+Create a visualization comparing years of experience required to the midpoint salary estimate. You'll need to:
+
+- Create a scatter plot using Plotly Express.
+- Use the `midpoint_salary_estimate` column for salary and `years_required` for the x-axis.
+
+```{python}
+# Create a scatter plot
+figure = px.scatter(glassdoor, x = 'min_years_summary',
+ y = 'midpoint_salary_estimate', 
+ title = 'Salary and Years of Experience', 
+ labels= {'min_years_summary':'Years of Experience', 'midpoint_salary_estimate': 'Midpoint salary estimate'},
+  template="plotly_dark") # add a fancy template
+
+figure.update_traces(marker=dict(line=dict(width=2, color='DarkSlateGrey')))
+figure.update_layout(
+    font=dict(size=16, family="Arial"),
+    title=dict(font=dict(size=20)),
+    margin=dict(l=50, r=50, t=50, b=50)  # Adjust margins
+)
+
+figure.show()
+
+# no clear relationship, the data shows many people having low years of experience and just a few with more years of experience. Salary does not correspond to years of experience
+```
+
+Describe any relationships you see in the plot.
+
+# Task 2: Extract Programming Language Requirements
+
+In this task, we will ask the LLM to extract the programming languages mentioned in the job descriptions.
+
+## Part A: Create and Test LLM Function
+
+Now, create a function that asks the model about the programming languages mentioned in the job description. Specifically, it should return one of four categories regarding the languages mentioned: `"R"`, `"Python"`, `"both"`, or `"neither"`. This time, you'll need to craft the prompt yourself.
+
+Test your function on a few rows and refine your prompt until you get reliable results. (You can write the output to a CSV file to more easily compare the results to the original job descriptions.)
+
+```{python}
+def lang_req(description):
+    # Craft your prompt here
+    prompt = f"""
+    Based on the job description provided, return at least one of four categories regarding the languages mentioned in the job description. Return ONLY one answer. That is, if ONLY "R" is mentined, return only `"R"`; if ONLY "Python" is mentioned, return ONLY `"Python"`. If both "R" and "Python" are mentioned in the description, return ONLY `"both"`. Otherwise, Return `"neither"
+    Here's the job description:
+    {description}
+    """
+    return llm_chat(prompt)
+
+# Vectorize the function and test it on the first few rows
+lang_req_vec = np.vectorize(lang_req) # vectorize the function
+
+glassdoor_v1['prog_lang'] = lang_req_vec(glassdoor_v1['job_description'])
+glassdoor_v1
+
+```
+
+## Part B: Process Full Dataset
+
+Once you're satisfied with your function's performance, apply it to the full dataset:
+
+```{python}
+# Apply the function to the full dataset
+glassdoor['prog_lang'] = lang_req_vec(glassdoor['job_description'])
+
+glassdoor.to_csv('outputs/glassdoor_full_v1.csv')
+
+```
+
+## Part C: Create Visualization
+
+First, count the number of jobs that require each of the four categories using the `value_counts` method. 
+
+```{python}
+# Count the occurrences of each category
+glassdoor ['prog_lang'].value_counts ()
+
+glassdoor['prog_lang_clean'] = glassdoor['prog_lang'].str.replace(r'[\'"`]', '', regex=True).str.strip()
+
+glassdoor['prog_lang_clean'].value_counts()
+
+glassdoor.to_csv('outputs/GLASSdoor.csv')
+```
+
+
+Create a box plot comparing salary distributions across the different programming language requirement categories:
+
+```{python}
+# Create a box plot using Plotly Express
+# Fancy Boxplot with Plotly Express
+# remove the glasdoor estimate from y-values
+glassdoor['salary_estimate'] = glassdoor['salary_estimate'].str.replace(r' \(Glassdoor est.\)', '', regex=True)
+
+fig = px.box(
+    glassdoor, 
+    x='prog_lang_clean', 
+    y='salary_estimate', 
+    color='prog_lang_clean', 
+    title='Salary Estimates by Programming Language Expertise',
+    labels={'prog_lang_clean': 'Programming Language', 'salary_estimate': 'Average Salary (in $K)'},
+    template='plotly_dark'
+)
+
+# Customize plot further
+fig.update_traces(marker=dict(size=10, line=dict(width=2)))
+fig.update_layout(font=dict(size=14, family="Arial"), title=dict(font=dict(size=20)))
+
+fig.show()
+
+# R users seem to have the highest median salary, comparing to Python data scientists
+```
+
+Write a few sentences describing any patterns you see in the plot. (Note that this is a very small sample of jobs, so don't read too much into the results.)
+
+# Optional Challenge: Most Common Technical Skills
+
+Use an LLM function to extract the most common technical skills mentioned in job descriptions, 
+then create a visualization to highlight these skills.
+
+You will need to design your own approach to extract and standardize technical skills, 
+being explicit in your prompt about what constitutes a technical skill.
+
+There's no single correct way to classify and standardize skills—document 
+your choices and reasoning as you develop your solution.
+
+```{python}
+def tech_skills(description):
+    # Craft your prompt here
+    prompt = f"""
+    Based on the job description provided, return the most technical skills mentioned in the job description, 
+    under required skills or under minimum qualifications. Return ONLY a single category; that is return ONLY ONE of these Categories: `Data Analysis`, 
+    `Data Manipulation`, `Visualization`, `Programming`. If none of these appear in the descriuption, just return, 'Other skills'
+    Here's the job description:
+    {description}
+    """
+    return llm_chat(prompt)
+ 
+# Vectorize the function and test it on the first few rows
+tech_skills_vec = np.vectorize(tech_skills) # vectorize the function
+
+glassdoor_v1['tech_skills'] = tech_skills_vec(glassdoor_v1['job_description'])
+glassdoor_v1.to_csv('outputs/techskills.csv')
+
+# Apply the vectorized function to the full dataset
+glassdoor['tech_skills'] = tech_skills_vec(glassdoor['job_description'])
+
+
+```
+
+```{python}
+
+glassdoor['tech_skills_clean'] = glassdoor['tech_skills'].str.replace(r'[\'"`]', '', regex=True).str.strip()
+
+glassdoor['tech_skills_clean'].value_counts()
+
+# Create a histogram
+fig = px.histogram(
+    glassdoor,
+    x="tech_skills_clean",
+    nbins=10,  # Number of bins
+    title="Data Scientist' Technical Skills",
+    labels={"tech_skills_clean": "Technical skills"},
+    template="plotly_dark",
+    color_discrete_sequence=["#636EFA"]
+)
+
+# Customize appearance
+fig.update_layout(
+    xaxis_title="Technical skills",
+    yaxis_title="Count",
+    font=dict(size=14, family="Arial"),
+    title=dict(font=dict(size=20)),
+    bargap=0.2  # Space between bars
+)
+
+# Display the histogram
+fig.show()
+
+# data anlysis is the most preferred technical skill for data scientists
+```

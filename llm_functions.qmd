@@ -1,0 +1,145 @@
+---
+title: "Large Language models"
+format: html
+---
+# imports
+```{python}
+# install openai
+from openai import OpenAI
+import pandas as pd
+import numpy as np
+from local_settings import OPENAI_KEY
+```
+# Setting up the OpenAI Client
+
+```{python}
+client = OpenAI(api_key= OPENAI_KEY)
+```
+# Making our first ::: {.callout}
+
+```{python}
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[
+        {"role": "user", "content": "What is the most tourist-friendly in France"}
+    ],
+)
+```
+:::
+
+```{python}
+response.choices[0].message.content
+```
+# Defining a Helper function
+```{python}
+def llm_chat (message):
+    response = client.chat.completions.create(
+    model = "gpt-4o-mini",
+    messages = [{'role': "user", 'content':message}])
+    
+    return response.choices[0].message.content
+```
+
+```{python}
+llm_chat("Tell me why Python is an awesome programming language?")
+```
+
+```{python}
+rec_brazil = llm_chat("What is the most tourist-friendly city in Brazil?")
+print (rec_brazil) # Rio
+```
+
+# Variables as prompt inputs
+```{python}
+def city_rec(country):
+    prompt = f"What is the most tourist-frindly city in {country}?"
+    return llm_chat(prompt)
+```
+
+```{python}
+city_rec("Kenya")
+```
+
+```{python}
+country_df = pd.DataFrame({'country': ['Kenya', 'Tanzania', 'France', 'England']})
+country_df
+```
+
+```{python}
+city_rec_vec = np.vectorize(city_rec)
+```
+
+```{python}
+city_rec_vec(['Kenya', 'England'])
+```
+
+```{python}
+# using the vectorized function on a dataframe
+country_df['city_rec'] = city_rec_vec(country_df['country'])
+country_df
+```
+
+```{python}
+def get_local_dishes(country):
+    prompt = f"Which is the most common local dish in {country}?"
+    return llm_chat(prompt)
+
+get_local_dishes_vec = np.vectorize(get_local_dishes)
+
+country_df['local_dishes'] = get_local_dishes_vec(country_df['country'])
+country_df
+
+```
+# Automated summary : Movies dataset
+
+```{python}
+import vega_datasets as vd
+movies = vd.data.movies().head()
+movies
+```
+
+```{python}
+
+movies['full_dict'] = movies.to_dict(orient = "records")
+movies
+```
+
+```{python}
+def movie_perfomance(movie_data):
+    prompt = f"Considering the following data on this movie {movie_data}, provide a one paragraph summary of its perfomance for my report."
+
+    return llm_chat(prompt)
+
+movie_perfomance_vec = np.vectorize(movie_perfomance)
+
+```
+
+```{python}
+movie_perfomance("Name: Daniel's movie. Sales: 100,000 USD")
+```
+
+```{python}
+movies['llm_summary'] = movie_perfomance_vec(movies['full_dict'])
+movies.to_csv("outputs/movies_output.csv")
+```
+
+```{python}
+# Practice question
+weather = vd.data.seattle_weather().head()
+#weather - view dataset
+weather['Weather_sum'] = weather.to_dict(orient = "records")
+# weather - check dataset to confirm dictionary is created
+
+def weather_sum(weather_data):
+    prompt = f"Considering the following data on weather {weather_data}, generate a one paragraph of the weather conditions for my report."
+
+    return llm_chat(prompt)
+
+weather_sum_vec = np.vectorize(weather_sum)
+
+weather['weather_summary'] = weather_sum_vec(weather['Weather_sum'])
+weather.to_csv("outputs/weather_output.csv")
+```
+
+select_one_from_repeat	
+regex(., '^[0-9]{10}$')

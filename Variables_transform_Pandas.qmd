@@ -1,0 +1,102 @@
+# import pandas and load counties dataset
+```{python}
+import pandas as pd
+pd.set_option('display.max_columns', None)
+pd.options.mode.copy_on_write = True
+counties = pd.read_csv("data/us_counties_data.csv")
+counties # 3226 observations
+```
+
+
+```{python}
+area_df = counties[["county", "area_sq_miles", "pop_20"]]
+area_df
+```
+# Creating new variables
+
+```{python}
+area_df["area_sq_km"] = area_df["area_sq_miles"] * 2.59
+
+#New variable
+area_df["area_hectares"] = area_df["area_sq_miles"] * 100
+area_df
+
+#New variable - Area in Acres
+area_df["area_acres"] = area_df["area_sq_miles"] * 640
+area_df
+```
+
+# modifying existing variables
+
+```{python}
+area_df["area_sq_km"]= area_df["area_sq_km"].round(2)
+area_df
+```
+```{python}
+area_df["area_acres"]= area_df["area_acres"].round(1)
+area_df
+```
+# Calculating with multiple variables
+
+```{python}
+# Population density
+area_df["pop_per_sq_km"] = (area_df["pop_20"] / area_df["area_sq_km"]).round(1)
+area_df
+
+#sorting values
+area_df = area_df.sort_values(by = "pop_per_sq_km",  ascending = False )
+area_df
+```
+
+# Foreign Born %
+
+```{python}
+#counties
+counties["foreign_born_pct"] = ((counties["foreign_born_num"] / counties["pop_20"])*100).round(1)
+counties
+
+#Which two counties have the highest % of foreign born residents
+counties = counties.sort_values(by = "foreign_born_pct",  ascending = False )
+counties
+
+# The counties with the highest % of foreign born residents are
+# 1. Miami-Dade in Florida - 53.9%
+#2. Queens in NY - 46.9%
+
+```
+# Creating boolean values
+
+```{python}
+changes_df = counties[["county", "pop_change_2010_2020", "pct_emp_change_2010_2021"]]
+changes_df
+```
+
+```{python}
+
+changes_df["pop_increase"] = changes_df["pop_change_2010_2020"] > 0
+changes_df["emp_increase"] = changes_df["pct_emp_change_2010_2021"] > 0
+changes_df
+```
+
+```{python}
+changes_df.query("pop_increase & ~(emp_increase)")
+```
+# Practice Q.
+
+```{python}
+foreign_born_df = counties[["county", "foreign_born_perc"]]
+foreign_born_df
+foreign_born_df["foreign_born_pct_gt_30"] = (foreign_born_df["foreign_born_perc"] > 30)
+foreign_born_df = foreign_born_df.query("foreign_born_pct_gt_30")
+num_rows = len(foreign_born_df)
+num_rows # am getting 23 rows, am not sure where it is wrong.
+
+```
+
+# Copy on Write Warning
+```{python}
+#pd.options.mode.copy_on_write = True
+
+#counties_mini = counties[["county", "area_sq_miles"]]
+
+```

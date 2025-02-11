@@ -1,0 +1,66 @@
+---
+title: "My first quarto Doc"
+author: "Daniel Osuka"
+format: 
+  html:
+    embed-resources: true
+execute:
+    echo: false
+---
+# Level 1 Header
+
+Markdown lets you use *italics* and **embolden texts**
+
+You can also use bulleted lists: 
+
+- First element
+- Second element
+
+You can also add links [links](https://thegraphcourses.org)
+
+You can also embed images
+![description of the image](images/tgc_unity.webp)
+
+
+## level 2 header
+
+### Level 3 header
+
+
+
+```{python}
+#|echo: false
+#|eval: false
+2+2
+```
+
+```{python}
+3*4
+
+for number in [1,2,3]:
+    print(number)
+4*4
+```
+# Displaying Tables
+
+```{python}
+import plotly.express as px
+from itables import show
+
+tips = px.data.tips()
+show(tips)
+```
+
+# Displaying plots
+
+```{python}
+px.violin(tips, x= "tip", y = 'sex')
+```
+# Displaying Static Plots
+
+
+```{python}
+tips_sex= px.violin(tips, x = 'tip', y ='sex')
+tips_sex.write_image('outputs/tips by sex.png')
+# Does not work
+```

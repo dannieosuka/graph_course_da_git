@@ -1,0 +1,112 @@
+
+# Imports
+```{python}
+import pandas as pd
+import plotly.express as px
+import warnings
+import calendar
+import vega_datasets as vd
+
+pd.options.mode.copy_on_write = True
+warnings.filterwarnings ("ignore")
+```
+
+```{python}
+weather_raw = vd.data.seattle_weather()
+
+```
+# Data
+```{python}
+# Query the data
+weather = weather_raw.query("date.dt.year == 2012")
+
+# Create the 'month' column as a categorical variable
+weather['month'] = pd.Categorical(
+    weather['date'].dt.strftime('%B'),
+    categories=list(calendar.month_name[1:]),  # Specify categories in calendar order
+    ordered=True                              # Specify the categorical order
+)
+weather
+
+```
+# Adding summary statistics with the transform
+
+```{python}
+weather.groupby("month").agg(mean_precip = ("precipitation", "mean"))
+```
+
+```{python}
+weather["mean_precip_month"] = weather.groupby("month")["precipitation"].transform ("mean")
+weather
+```
+
+```{python}
+weather["median_precip_month"] = weather.groupby("month")["precipitation"].transform ("median")
+weather
+```
+
+```{python}
+weather["sum_precip_month"] = weather.groupby("month")["precipitation"].transform ("sum")
+weather
+```
+
+```{python}
+weather["precip_month_perc"] = 100 * weather["precipitation"] /  weather["sum_precip_month"]
+weather
+```
+
+```{python}
+tips = px.data.tips()
+
+# calculate daily tips proportion
+tips["daily_total_tips"] = tips.groupby("day")["tip"].transform ("sum")
+
+# tip proportion //proportion calculated as a percentage
+tips["tip_day_perc"] = 100 * tips["tip"] /  tips["daily_total_tips"]
+
+tips
+
+```
+
+```{python}
+weather = weather [["date", "month", "precipitation", "wind", "weather"]]
+```
+# Counting values within groups using the value.counts()
+
+```{python}
+weather['weather'].value_counts
+
+weather['weather'].value_counts(normalize=True) # proportions
+
+```
+# Grouped version
+
+```{python}
+weather.groupby ("month")['weather'].value_counts(normalize = True).reset_index()
+
+```
+
+```{python}
+# Practice
+tips ['smoker'].value_counts()
+tips.groupby ("day")['smoker'].value_counts().reset_index()
+
+```
+# Cumulative sums
+
+```{python}
+# cumulative rain per month in the weahter dataset
+weather ["precip_cum"] = weather.groupby ("month")["precipitation"].cumsum ()
+weather
+```
+
+```{python}
+tips = tips.sort_values('day')
+tips ["cumul_totalbill_day"] = tips.groupby ("day")["total_bill"].cumsum ()
+tips ["cumul_tip_day"] = tips.groupby ("day")["tip"].cumsum ()
+tips
+
+
+
+
+```

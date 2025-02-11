@@ -1,0 +1,181 @@
+# Imports 
+
+
+```{python}
+import pandas as pd
+```
+# Dataset
+
+```{python}
+yaounde = pd.read_csv("D:\APHRC\Graph Courses_python\data\yaounde_data.csv")
+yaounde
+```
+
+```{python}
+yao = yaounde[["age", "sex", "weight_kg", "neighborhood",
+"occupation", "symptoms", "is_smoker", "is_pregnant", "igg_result",
+"igm_result" ]]
+yao
+```
+
+# introduce query
+
+```{python}
+#creating a new subset of the data
+yao_male = yao.query("sex == 'Male'")
+yao_male
+```
+```{python}
+#Get the number of rows fulfilling this code chunk
+yao.query("sex == 'Male'").shape[0]
+```
+# Subset for pregnant individuals
+```{python}
+#creating a new subset of the data
+yao_pregnant = yao.query("is_pregnant == 'Yes'")
+yao_pregnant
+```
+# Relational Operators
+
+```{python}
+yao.query("sex == 'Male'") # Equal to
+yao.query("sex != 'Male'") # Equal to
+yao.query("age > 7") # Greater than
+yao.query("age >=7") # Greater than/equal to
+yao.query("age < 7") # less than
+yao.query("age <=7") # less than/equal to
+
+#is in
+yao.query ("neighborhood.isin(['Briqueterie','Carriere'])")
+
+```
+
+# Practice
+# Keep children u18 - Yao_children
+# use isin to keep those in Carriere or Ekoudou nborhoods
+
+```{python}
+yao_children = yao.query("age < 18") # children under 18
+yao_carr_ekoudou = yao.query ("neighborhood.isin(['Ekoudou','Carriere'])")
+print (yao_children)
+print (yao_carr_ekoudou)
+
+
+```
+# Accessing external variables
+
+```{python}
+min_age = 25
+yao.query("age >=@min_age")
+```
+
+# practice: subset for young respondents
+
+```{python}
+max_age = 30
+yao_young = yao.query("age <=@max_age")
+print(yao_young)
+```
+
+# Combining Conditions
+
+```{python}
+yao.query("age < 18 | age > 65") # age is less than 18, or greater than 65
+```
+
+```{python}
+#either pregnant or ex_smokers
+yao.query('is_pregnant == "Yes"  & is_smoker == "Ex-smoker"')
+```
+
+```{python}
+#get unique values in columns
+yao.is_smoker.value_counts()
+```
+# Practice for igg positive men
+
+```{python}
+yao.igg_result.value_counts()
+yao_igg_positive_men = yao.query('igg_result == "Positive" & sex == "Male"')
+print (yao_igg_positive_men) # 148 rows
+
+```
+
+# negating operators
+
+```{python}
+#return individuals who do not fulfill the condition
+yao.query("~(occupation == 'Student')")
+
+#equivalent to
+yao.query("occupation != 'Student'")
+
+```
+
+```{python}
+yao.query(" ~ (age < 18 | weight_kg < 30)")
+```
+# Practice
+# Drop smokers and drop those above 50
+
+```{python}
+yao_dropped = yao.query(" ~ (age > 50 | is_smoker == 'Smoker')")
+yao_dropped
+
+```
+# NaN Values - indicates missing data 
+
+```{python}
+#yao.query("is_pregnant == 'NaN'") # Doesnt work
+```
+
+```{python}
+yao.query("is_pregnant.isna()")
+```
+
+```{python}
+yao.query("is_pregnant.notna()")
+
+```
+
+```{python}
+#Practice
+#Keep Missing Smoking Status
+yao.query("is_smoker.isna()")
+
+```
+# Querying Based on String patterns
+
+```{python}
+yao.occupation.value_counts()
+```
+
+```{python}
+#values containing the string student
+yao.query("occupation.str.contains('Student')")
+```
+
+```{python}
+#values not containing the substring 'student'
+yao.query(" ~(occupation.str.contains('Student'))")
+
+```
+```{python}
+#contains students or farmers
+yao_student_farmer = yao.query("occupation.str.contains('Student |Farmer')")
+yao_student_farmer
+
+```
+# practice
+# Symptoms
+
+```{python}
+yao.symptoms.value_counts()
+
+```
+
+```{python}
+yao_cough_fever = yao.query("symptoms.str.contains('Fever|Cough')")
+yao_cough_fever
+
+```

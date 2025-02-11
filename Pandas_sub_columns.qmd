@@ -1,0 +1,94 @@
+# Subsetting Columns
+
+# Imports
+
+```{python}
+import pandas as pd
+
+yao = pd.read_csv("data/yaounde_data.csv")
+yao
+
+yao[["age", "sex"]]
+yao["age"] # does not return a DataFrame
+yao[["age"]] #returns a DataFrame
+
+# Storing Datasets
+yao_subset = yao[["age", "sex", "igg_result"]]
+yao_subset
+
+#over-writing a dataframe
+yao_subset = yao[["age"]]
+yao_subset
+
+#Practice: Subsetting the yao dataset to select weight and height variables.
+yao_height_weight = yao[["weight_kg", "height_cm"]]
+yao_height_weight
+
+#Other ways to select columns in Pandas ---using loc[] and take ()
+```
+# Excluding columns with drop ()
+
+```{python}
+yao.drop(columns = ["age"])
+
+#dropping several columns
+yao.drop(columns = ["age", "sex"])
+
+```
+# Practice: Dropping columns with drop ()
+
+```{python}
+yao_no_education_consultation = yao.drop(columns = ["highest_education", "consultation"])
+yao_no_education_consultation
+```
+# Using *filter ()* to select columns by regex
+
+```{python}
+yao.filter(regex="ig")
+
+#selecting columns starting with the string "ig"
+yao.filter (regex ="^ig")
+
+#selecting columns ending with the string 'result'
+yao.filter(regex="result$")
+
+#Practice
+yao_is_columns = yao.filter (regex ="^is")
+yao_is_columns
+```
+# Changing column names with rename
+
+```{python}
+yao.rename(columns= {"äge": "patient_age", "sex": "patient_sex"})
+
+#Practice: renaming columns
+yao_age_cat= yao.rename(columns= {"äge_category": "age_cat"})
+yao_age_cat
+
+```
+# Cleaning messy column names
+
+```{python}
+test_df = pd.DataFrame(
+    {"good_name": range(3), "bad name": range(3), "bad*@name*2": range(3)}
+)
+test_df
+
+test_df.good_name 
+clean_names = test_df.columns.str.replace(r'[^a-zA-z0-9]', '_', regex = True)
+test_df.columns = clean_names
+test_df
+```
+
+# Practice: Clean column names using regex
+
+```{python}
+cleaning_practice = pd.DataFrame(
+    {"Aloha": range(3), "Bell Chart": range(3), "Animals@the zoo": range(3)}
+)
+cleaning_practice
+
+clean_names = cleaning_practice.columns.str.replace(r'[^a-zA-z0-9]', '_', regex = True)
+cleaning_practice.columns = clean_names
+cleaning_practice
+```

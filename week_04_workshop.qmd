@@ -1,0 +1,67 @@
+---
+title: "India TB Pathways Analysis"
+author: "DANIEL OSUKA"
+format: 
+    html:
+        embed-resources: true
+
+execute: 
+      echo: false
+---
+
+```{python}
+# import the required packages
+import pandas as pd
+import plotly.express as px
+from itables import show
+
+```
+
+*The India TB Pathways dataset is based on a study conducted in Vellore district, Tamil Nadu, India. It examines the pre-diagnostic costs and health-seeking behavior of 880 new adult pulmonary tuberculosis patients registered at Primary Health Centres (PHCs).*
+
+
+```{python}
+tb_data = pd.read_csv("data/india_tb_pathways_and_costs.csv")
+show(tb_data)
+```
+
+## Map of India
+![Map of India](D:\APHRC\Graph Courses_python\india_image.png)
+
+## Bivariate relationship between Gender and BMI
+
+Men have slightly higher median BMI (17)  compared to females 
+
+```{python}
+fig = px.violin(tb_data,
+          y ="bmi",
+          x = "Sex",
+          color = 'Sex',
+          title = 'Sex and BMI',
+          points="all", #show all points
+          box= True)
+fig.update_traces(
+    meanline_visible=True, #show the mean line
+    scalemode='count',
+    marker=dict(size=5, opacity=0.6)
+)
+fig.update_layout(
+    title_font_size=22,
+    plot_bgcolor="lightgray",
+    paper_bgcolor="white",
+    font=dict(family="Arial", size=14, color = "black"),
+    xaxis_title = "Gender",
+    yaxis_title = "BMI (kg/m^2)"
+)
+fig.show()
+```
+
+# Optional Challenge
+
+```{python}
+max_age = int(tb_data.Age.max())
+common_gender = tb_data.Sex.mode()[0]
+```
+The maximum age of a patient registered at the PHCs is `{python} max_age`
+
+There are more `{python} common_gender` registered at the PHCs.
