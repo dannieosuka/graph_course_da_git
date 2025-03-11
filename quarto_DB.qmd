@@ -1,0 +1,123 @@
+---
+title: "Gapminder 2007"
+format: dashboard
+theme: superhero
+---
+
+```{python}
+import plotly.express as px
+p = px.line ( y =[1,2,3])
+
+```
+
+# Layouts
+## Row {height="30%"}
+### Column {width="34%"}
+
+```{python}
+p
+
+```
+### Column {width="33%"}
+```{python}
+p
+
+```
+
+### Column {width="33%"}
+```{python}
+p
+
+```
+## Row {height="70%"}
+### Column {width="60%"}
+```{python}
+p
+
+```
+### Column{width="40%"}
+```{python}
+p
+
+```
+# Tabsets
+## Row {height="30%"}
+### Column {.tabset width="34%"}
+#### Tab 1
+
+```{python}
+p
+
+```
+#### Tab 2
+Hello world
+
+### Column {width="33%"}
+```{python}
+p
+
+```
+
+### Column {width="33%"}
+```{python}
+p
+
+```
+
+## Row {.tabset height="70%"}
+
+### Column {width="50%"}
+
+```{python}
+p
+
+```
+
+### Column {.tabset width="50%"}
+
+### Tab 1
+```{python}
+p
+
+```
+
+### Tab 2
+Hello world
+
+# Value Boxes
+```{python}
+import plotly.express as px
+tips = px.data.tips()
+
+num_cols = tips.shape[1]
+num_rows = tips.shape[0]
+
+```
+
+## {height="20%"}
+:::{.valuebox title="Number of columns" color="primary" icon="heart"}
+`{python} num_cols`
+
+Few columns
+:::
+
+:::{.valuebox title="Number of rows" color="secondary" icon="app"}
+`{python} num_rows`
+
+Many rows
+:::
+
+:::{.valuebox title="Other number" color="warning" icon="chat-fill"}
+1
+:::
+
+```{python}
+p
+
+```
+##
+
+```{python}
+p
+
+```
